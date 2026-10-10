@@ -40,6 +40,7 @@ constexpr size_t kMaxRequestBytes = 1024u << 10;
 const char* const kRequest = "download-request.txt";
 const char* const kStatus = "download-status.txt";
 const char* const kHeartbeat = "download-worker.ready";
+std::string Path(const char* name); // helper worker stores its heartbeat in the cheat folder
 void TouchHeartbeat()
 {
     static time_t last_touch = 0; // called only by the single worker thread
