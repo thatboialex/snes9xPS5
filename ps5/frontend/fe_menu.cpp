@@ -685,7 +685,10 @@ void CheatMenu()
 		if (n.down) sel = (sel + 1) % count;
 		if (n.pgup) sel = std::max(0, sel - kVisible);
 		if (n.pgdn) sel = std::min(count - 1, sel + kVisible);
-		if (n.ok || n.left || n.right)
+		// The navigation arrows auto-repeat; a toggle must react only to the edge,
+		// otherwise holding Left/Right flips the cheat repeatedly and hammers storage.
+		const uint32_t pressed_lr = ps5input::Pressed() & (SCE_PAD_BUTTON_LEFT | SCE_PAD_BUTTON_RIGHT);
+		if (n.ok || pressed_lr)
 		{
 			if (!emu::ToggleCheat(sel))
 				OrbisLog("[cheats] could not persist toggle for group %d", sel);
