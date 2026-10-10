@@ -256,6 +256,9 @@ void* DownloadThread(void*)
     OrbisMkdirs(Root() + "/database");
     std::unique_ptr<HttpClient> http = MakeCoverWorkerHttp(); // helper: TlsHttp using own TLS
     OrbisLog("[cheat-download] helper online: %zu Libretro SNES source files", SourceFiles().size());
+    // A previous helper may have quit halfway through a job. Never leave the
+    // persisted "downloading" state blocking all future requests on restart.
+    Status(0, 0, 0, 0, "idle");
     for (;;)
     {
         TouchHeartbeat();
