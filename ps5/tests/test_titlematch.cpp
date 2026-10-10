@@ -1,5 +1,6 @@
 // Standalone regression tests for the shared filename matcher (no PS5 SDK required).
 #include "../frontend/fe_titlematch.h"
+#include "../frontend/fe_cheatlookup.h"
 #include <cassert>
 #include <string>
 #include <vector>
@@ -30,6 +31,23 @@ int main()
     assert(Best(cheats,"Kidou Butoden G-Gundam") == cheats[0]);
     assert(Best(cheats,"Super Mario World (USA)") == cheats[1]);
     assert(Best(cheats,"This Name Has No Match").empty());
+    // EarthBound can be named EarthBound.sfc, while the manually copied
+    // Libretro file is usually EarthBound (USA).cht or a named subset.
+    const std::vector<std::string> local = {
+        "/data/snes9x/cheats/EarthBound (USA) (Action Replay).cht",
+        "/data/snes9x/cheats/EarthBound (USA).cht",
+        "/data/snes9x/cheats/EarthBound (USA) (Game Genie).cht",
+        "/data/snes9x/cheats/EarthBound Zero (Japan).cht",
+        "/data/snes9x/cheats/Chrono Trigger (USA).cht"
+    };
+    assert(fe::cheatlookup::Best(local,"EarthBound","EarthBound (USA)") == local[1]);
+    assert(fe::cheatlookup::Best(local,"EarthBound","") == local[1]);
+    assert(fe::cheatlookup::Best(local,"EarthBound (USA)","EarthBound (USA)") == local[1]);
+    assert(fe::cheatlookup::Best(local,"Chrono Trigger","") == local[4]);
+    assert(fe::cheatlookup::Best(local,"EarthBound Zero","") == local[3]);
+    assert(fe::cheatlookup::Best(local,"Different Game","").empty());
+    assert(fe::cheatlookup::Best({local[0],local[2]},"EarthBound","EarthBound (USA)") == local[0] ||
+           fe::cheatlookup::Best({local[0],local[2]},"EarthBound","EarthBound (USA)") == local[2]);
     std::cout << "Title matcher regressions passed\n";
     return 0;
 }
