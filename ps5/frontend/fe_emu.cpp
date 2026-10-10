@@ -315,7 +315,6 @@ bool ImportCheatsFromFile(const std::string& path)
     bool binary = false;
     if (!retro && !native && head.size()>=28)
     {
-        const size_t first = std::min(size_t(128), head.size());
         binary = head.find('\0')!=std::string::npos;
         if (binary)
         {
