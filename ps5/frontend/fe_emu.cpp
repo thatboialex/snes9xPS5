@@ -617,7 +617,10 @@ bool LoadGame(const std::string& path)
 	S9xCheatsEnable();
 	const std::string base = S9xBasenameNoExt(path);
 	const std::string official = OfficialCheatTitle();
-	fe::InstallCachedCheat({base, official});
+	// The user's own EarthBound (USA).cht must take priority over any
+	// automatically cached alternative. Never replace an existing choice.
+	if (FindManualCheatFile().empty())
+		fe::InstallCachedCheat({base, official});
 	const bool found = !FindManualCheatFile().empty();
 	if (!LoadManualCheatsForRom() && !found && fe::Config().cheats_auto_download)
 	{
@@ -676,6 +679,12 @@ std::string CheatStatus()
 bool ReloadDownloadedCheats()
 {
 	if (!g.loaded || !Cheat.group.empty()) return false; // never replace user's current cheat selections
+	// CheatMenu is redrawn at 60 Hz; scanning a 2,773-file library
+	// every frame would stall input and waste CPU.
+	static double next_attempt = 0;
+	const double now = Now();
+	if (now < next_attempt) return false;
+	next_attempt = now + 1.0;
 	return LoadManualCheatsForRom();
 }
 
