@@ -2,12 +2,19 @@
 
 The PS5's native emulator cannot use its ordinary libSceHttp2 connection after leaving the app sandbox. All cheat downloads therefore run in the **same separate helper payload** that handles cover downloads, using the tested Mbed TLS client. Requests and progress are exchanged through atomic files under `/data/snes9x/cheats`.
 
+## Automatic downloads
+
+**Auto-download missing cheats is ON by default.** The first time a ROM starts, its No-Intro/CRC title is looked up in the embedded Libretro SNES database. If a matching entry is found and no per-game cheat file already exists, the emulator queues a background download for the running helper. Open the Cheat Manager after the download completes to load the new codes. Disable this behavior through **Settings > Auto-download missing cheats**.
+
+The installer must start the **new helper payload**. If an older Snes9x helper is still resident on the PS5, fully restart the console, then load the new installer ELF again before opening the dashboard icon. Otherwise cheat requests may stay in the `queued` state.
+
 ## PS5 controls
 
 | Where | Action |
 |---|---|
 | 3D game shelf | **R2** – download cheats for the selected game |
 | 3D game shelf | **R3** – retry all currently missing covers |
+| Settings > Repair missing covers | Requeue missing art, with title-screen/screenshot fallback |
 | 3D game shelf | **Square** – retry the selected cover |
 | Settings > Cheat downloads | download missing cheats for all installed games or the entire SNES database |
 | In a game > pause > Cheat manager | **Options** – open cheat downloads |
