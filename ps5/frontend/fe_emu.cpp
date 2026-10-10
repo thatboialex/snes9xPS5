@@ -271,9 +271,13 @@ std::string FindManualCheatFile()
     std::vector<std::string> choices;
     const std::string root = OrbisDir("cheats");
     const char* const subdirs[] = {"", "database", "Nintendo - Super Nintendo Entertainment System"};
+    std::vector<std::string> dirs;
     for (const char* sub : subdirs)
+        dirs.push_back(*sub ? root + "/" + sub : root);
+    const size_t slash = g.rom_path.find_last_of("/");
+    if (slash!=std::string::npos) dirs.push_back(g.rom_path.substr(0,slash));
+    for (const std::string& dir : dirs)
     {
-        const std::string dir = *sub ? root + "/" + sub : root;
         DIR* d = opendir(dir.c_str());
         if (!d) continue;
         while (dirent* e = readdir(d))
