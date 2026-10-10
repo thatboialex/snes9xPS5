@@ -29,6 +29,9 @@ inline std::string TrimFrontendSuffix(std::string title)
 // game from a similar title or append a generic "(Japan)" suffix.
 inline std::string Canonical(const std::string& filename)
 {
+    // Respect explicit cartridge regions. Translated filenames in this table
+    // have no USA/Japan/France region tag, only a language/collection suffix.
+    if (!titles::Region(filename).empty()) return "";
     const std::string key=titles::Key(TrimFrontendSuffix(filename));
     if (key=="finalfantasy6" || key=="finalfantasyvi")
         return "Final Fantasy VI (Japan)";
