@@ -31,7 +31,11 @@ inline std::string Canonical(const std::string& filename)
 {
     // Respect explicit cartridge regions. Translated filenames in this table
     // have no USA/Japan/France region tag, only a language/collection suffix.
-    if (!titles::Region(filename).empty()) return "";
+    if (!titles::Region(filename).empty() ||
+        filename.find("(France)")!=std::string::npos ||
+        filename.find("(Germany)")!=std::string::npos ||
+        filename.find("(Spain)")!=std::string::npos ||
+        filename.find("(Korea)")!=std::string::npos) return "";
     const std::string key=titles::Key(TrimFrontendSuffix(filename));
     if (key=="finalfantasy6" || key=="finalfantasyvi")
         return "Final Fantasy VI (Japan)";
