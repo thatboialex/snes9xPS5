@@ -205,12 +205,23 @@ bool Exists(const std::string& path)
 	return stat(path.c_str(), &st) == 0;
 }
 
-bool RecentlyMissing(const std::string& marker)
+bool RecentlyMissing(const std::string& marker, const std::string& url)
 {
-	struct stat st = {};
-	if (stat(marker.c_str(), &st) != 0)
-		return false;
-	return time(nullptr) - st.st_mtime < kMissingRetrySeconds;
+    struct stat st = {};
+    if (stat(marker.c_str(), &st) != 0 || time(nullptr) - st.st_mtime >= kMissingRetrySeconds)
+        return false;
+    // A 404 from an older artwork index should not suppress a newly found
+    // box/title/screenshot URL for the next 30 days.
+    FILE* f = fopen(marker.c_str(), "r");
+    if (!f) return false;
+    char line[8192] = {};
+    const bool read = fgets(line, sizeof(line), f) != nullptr;
+    fclose(f);
+    if (!read) return false;
+    std::string old(line);
+    while (!old.empty() && (old.back() == '\n' || old.back() == '\r'))
+        old.pop_back();
+    return old == url;
 }
 
 uint32_t Pack(int r, int g, int b)
@@ -465,7 +476,7 @@ std::vector<WantedCover> MissingCovers(const std::vector<GameInfo>& games)
 		const std::string file = ThumbnailName(name) + ".png";
 		const std::string cache = covers + "/" + file;
 		if (!Exists(RefetchMarker(cache)) &&
-			(NonEmptyFile(cache) || RecentlyMissing(cache.substr(0, cache.size() - 4) + ".missing")))
+			(NonEmptyFile(cache) || RecentlyMissing(cache.substr(0, cache.size() - 4) + ".missing", CoverUrlForGame(g))))
 			continue;
 		const std::string own = FindWithExts(covers + "/" + g.file_base);
 		if (!own.empty() && own != cache)
@@ -512,7 +523,7 @@ bool CoverService::NeedsDownload(int i) const
 		return false; // a picture beside the ROM is used before a download
 	if (Exists(RefetchMarker(cache)))
 		return true; // asked for again (Square)
-	return !NonEmptyFile(cache) && !RecentlyMissing(cache.substr(0, cache.size() - 4) + ".missing");
+	return !NonEmptyFile(cache) && !RecentlyMissing(cache.substr(0, cache.size() - 4) + ".missing", CoverUrlForGame(g));
 }
 
 void CoverService::Start(const std::vector<GameInfo>& games, bool allow_download, bool background)
@@ -606,7 +617,7 @@ bool CoverService::Download(int i)
 	if (cache.empty())
 		return false;
 	const std::string marker = cache.substr(0, cache.size() - 4) + ".missing";
-	if (m_offline || RecentlyMissing(marker))
+	if (m_offline || RecentlyMissing(marker, CoverUrlForGame(g)))
 		return false;
 	const std::string url = CoverUrlForGame(g);
 	std::vector<uint8_t> data;
