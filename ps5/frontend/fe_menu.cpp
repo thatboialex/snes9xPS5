@@ -10,6 +10,7 @@
 #include "fe_emu.h"
 #include "fe_cheatdownload.h"
 #include "fe_games.h"
+#include "fe_shelf.h"
 #include "fe_settings.h"
 #include "fe_shortcuts.h"
 #include "fe_text.h"
@@ -346,6 +347,7 @@ void SettingsMenu()
 			rows.push_back({SettingLabel(s), SettingValue(s)});
 		rows.push_back({"Controller shortcuts", ""});
 		rows.push_back({"Cheat downloads", ""});
+		rows.push_back({"Repair missing covers", ""});
 		rows.push_back({"Back", ""});
 		Header("Settings");
 		DrawOptionBox("Settings", rows, sel, false);
@@ -370,7 +372,13 @@ void SettingsMenu()
 			CheatDownloadsMenu();
 			nav = NavReader();
 		}
-		if (n.back || n.options || (n.ok && sel == S_COUNT + 2))
+		if (n.ok && sel == S_COUNT + 2)
+		{
+			const int count = RepairMissingCovers();
+			OrbisLog("[settings] queued %d missing covers for retry", count);
+			nav = NavReader();
+		}
+		if (n.back || n.options || (n.ok && sel == S_COUNT + 3))
 		{
 			Config().Save();
 			return;
