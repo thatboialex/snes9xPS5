@@ -40,6 +40,17 @@ constexpr size_t kMaxRequestBytes = 1024u << 10;
 const char* const kRequest = "download-request.txt";
 const char* const kStatus = "download-status.txt";
 const char* const kHeartbeat = "download-worker.ready";
+void TouchHeartbeat()
+{
+    static time_t last_touch = 0; // called only by the single worker thread
+    const time_t now = time(nullptr);
+    if (now - last_touch >= 2)
+    {
+        const char ready[] = "ready\n";
+        WriteFileAtomicTo(Path(kHeartbeat), std::vector<uint8_t>(ready,ready+sizeof(ready)-1));
+        last_touch = now;
+    }
+}
 
 std::string Root() { return OrbisDir("cheats"); }
 std::string Path(const char* name) { return Root() + "/" + name; }
@@ -180,8 +191,10 @@ bool Queue(const std::string& request)
 bool DownloadSource(HttpClient& http, const std::string& source, const std::string& target)
 {
     if (NonEmpty(target)) return true;
+    TouchHeartbeat();
     std::vector<uint8_t> bytes;
     const int code = http.Get(std::string(kLibretroFolder) + UrlEncode(source), bytes, kMaxCheatFile);
+    TouchHeartbeat();
     if (code != 200 || !PlausibleCheats(bytes))
     {
         OrbisLog("[cheat-download] %s -> %d (%zu bytes)", source.c_str(), code, bytes.size());
@@ -242,17 +255,9 @@ void* DownloadThread(void*)
     OrbisMkdirs(Root() + "/database");
     std::unique_ptr<HttpClient> http = MakeCoverWorkerHttp(); // helper: TlsHttp using own TLS
     OrbisLog("[cheat-download] helper online: %zu Libretro SNES source files", SourceFiles().size());
-    time_t heartbeat = 0;
     for (;;)
     {
-        const time_t now = time(nullptr);
-        if (now - heartbeat >= 2)
-        {
-            heartbeat = now;
-            const char ready[] = "ready\n";
-            WriteFileAtomicTo(Path(kHeartbeat),
-                std::vector<uint8_t>(ready, ready+sizeof(ready)-1));
-        }
+        TouchHeartbeat();
         std::vector<std::string> lines;
         if (!Consume(lines)) { usleep(500 * 1000); continue; }
         const bool all = lines[0] == "all";
@@ -292,7 +297,7 @@ bool CheatDownloadWorkerAlive()
     struct stat st = {};
     return stat(Path(kHeartbeat).c_str(), &st)==0 && S_ISREG(st.st_mode) &&
         st.st_size>0 && time(nullptr) >= st.st_mtime &&
-        time(nullptr)-st.st_mtime <= 12;
+        time(nullptr)-st.st_mtime <= 40;
 }
 std::string CheatDownloadPath(const std::string& basename)
 {
