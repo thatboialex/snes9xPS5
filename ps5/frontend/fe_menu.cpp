@@ -750,7 +750,10 @@ void CheatDownloadsMenu(const CheatRequestGame& game)
         Header(have_game ? game.basename.c_str() : "Cheat downloads");
         DrawOptionBox("Cheat Downloads", rows, sel, false);
         char status[192];
-        if (!p.valid) snprintf(status, sizeof(status), "Idle - %zu source cheat files available", CheatDatabaseCount());
+        if (!p.helper_alive)
+            snprintf(status, sizeof(status), "Helper NOT READY - restart PS5 and reinstall updated ELF");
+        else if (!p.valid)
+            snprintf(status, sizeof(status), "Helper ready - %zu source cheat files", CheatDatabaseCount());
         else snprintf(status, sizeof(status), "%s: %d/%d processed, %d saved, %d failed",
                       p.state.c_str(), p.done, p.total, p.found, p.failed);
         DrawText(125, H - 180, FitText(status, 3, W - 250).c_str(), 3, kText);
@@ -781,8 +784,19 @@ void CheatDownloadsMenu(const CheatRequestGame& game)
                 collection.push_back({entry.file_base, entry.nointro});
             queued = RequestLibraryCheats(collection);
         }
-        if (!queued)
-            OrbisLog("[cheat-download] request ignored (already queued, empty, or invalid)");
+        if (queued)
+            MessageBox("Cheat download queued",
+                "The helper is downloading in the background. Check this screen for progress.");
+        else if (!CheatDownloadWorkerAlive())
+            MessageBox("Cheat downloader offline",
+                "Restart PS5, send the latest installer ELF, and reopen the app.");
+        else if (have_game && sel == 0 && BestCheatSourceFile(game).empty())
+            MessageBox("No matching cheats",
+                "No safe Libretro title match for this ROM. Try another ROM revision.");
+        else
+            MessageBox("Download not started",
+                "A download is already queued/running, or the cheat folder is not writable.");
+        nav = NavReader();
     }
 }
 
