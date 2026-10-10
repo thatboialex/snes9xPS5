@@ -3,6 +3,7 @@
 
 #include "fe_covers.h"
 #include "fe_titlematch.h"
+#include "fe_artaliases.h"
 
 #include "fe_coverworker.h"
 #include "fe_text.h"
@@ -89,12 +90,20 @@ const std::vector<std::string>& SnapArtNames()
 }
 std::string MatchArtName(const std::vector<std::string>& names, const GameInfo& game)
 {
+    // A translated/hacked ROM's filename can be unlike the original Japanese
+    // box-art entry. Try only verified aliases for such known games.
+    const std::string alias = artaliases::Canonical(game.file_base);
+    if (!alias.empty() && std::find(names.begin(), names.end(), alias) != names.end())
+        return alias;
     const std::string requested = game.nointro.empty() ? game.file_base : game.nointro;
     auto exact = std::find(names.begin(), names.end(), requested);
     if (exact != names.end()) return *exact; // preserve revisions and git symlinks
     std::string result = titles::Best(names, requested);
-    if (result.empty() && !game.nointro.empty())
-        result = titles::Best(names, game.file_base);
+    if (result.empty())
+    {
+        const std::string cleaned = artaliases::TrimFrontendSuffix(game.file_base);
+        result = titles::Best(names, cleaned);
+    }
     return result;
 }
 std::string MatchFallbackArt(const std::vector<std::string>& names, const GameInfo& game)
@@ -103,7 +112,7 @@ std::string MatchFallbackArt(const std::vector<std::string>& names, const GameIn
     static std::mutex match_mutex;
     static std::unordered_map<std::string, std::string> cache;
     // The lookup cache is shared safely by the cover thread and the menu.
-    const std::string key = ( &names == &TitleArtNames() ? "T:" : "S:") + requested + "|" + game.file_base;
+    const std::string key = (&names == &TitleArtNames() ? "T:" : "S:") + requested + "|" + game.file_base;
     {
         std::lock_guard<std::mutex> lock(match_mutex);
         auto it = cache.find(key);
@@ -384,11 +393,12 @@ std::shared_ptr<CoverTex> Placeholder(const GameInfo& g)
 std::string CoverNameFor(const GameInfo& game)
 {
     const std::string requested = game.nointro.empty() ? game.file_base : game.nointro;
+    const std::string cache_key = requested + "|" + game.file_base;
     static std::mutex mutex;
     static std::unordered_map<std::string,std::string> cache;
     {
         std::lock_guard<std::mutex> guard(mutex);
-        const auto it = cache.find(requested);
+        const auto it = cache.find(cache_key);
         if (it!=cache.end()) return it->second;
     }
     const std::string best_boxart = MatchArtName(BoxArtNames(), game);
@@ -397,7 +407,7 @@ std::string CoverNameFor(const GameInfo& game)
     if (best!=requested) OrbisLog("[covers] fuzzy art: %s -> %s", requested.c_str(), best.c_str());
     {
         std::lock_guard<std::mutex> guard(mutex);
-        cache.emplace(requested,best);
+        cache.emplace(cache_key,best);
     }
     return best;
 }
