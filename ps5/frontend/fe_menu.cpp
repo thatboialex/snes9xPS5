@@ -681,6 +681,7 @@ void CheatMenu()
 		{
 			Header("Cheats");
 			DrawOptionBox("No cheats found", {{"Download cheats for this game", ""}, {"Back", ""}}, 0, false);
+			DrawText(150, H - 184, FitText(emu::CheatStatus(), 3, W - 300).c_str(), 3, kText);
 			Footer("Cross: Download cheats     Circle: Back");
 		}
 		else
