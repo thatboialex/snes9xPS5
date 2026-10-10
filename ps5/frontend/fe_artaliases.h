@@ -25,6 +25,13 @@ inline std::string TrimFrontendSuffix(std::string title)
         title.pop_back();
     return title;
 }
+// A few unlicensed games deliberately lack a Libretro cover entry. They
+// must not inherit the art of a different official game via a misleading CRC.
+inline bool DistinctBootleg(const std::string& filename)
+{
+    const std::string key=titles::Key(TrimFrontendSuffix(filename));
+    return key=="pokemongoldsilver" || key=="aladdin2000";
+}
 // Deliberately exact aliases for known translation names; never infer an unrelated
 // game from a similar title or append a generic "(Japan)" suffix.
 inline std::string Canonical(const std::string& filename)
