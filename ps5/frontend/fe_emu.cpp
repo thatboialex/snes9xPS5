@@ -518,6 +518,12 @@ bool LoadGame(const std::string& path)
 		const bool ok = LoadRetroArchCheats(cht) || S9xLoadCheatFile(cht);
 		if (ok) OrbisLog("[emu] cheats from %s (%zu groups)", cht.c_str(), Cheat.group.size());
 	}
+	else if (fe::Config().cheats_auto_download)
+	{
+		const fe::CheatRequestGame request{base, official};
+		if (!fe::BestCheatSourceFile(request).empty() && fe::RequestGameCheats(request))
+			OrbisLog("[cheats] queued automatic download for %s", base.c_str());
+	}
 
 	g.loaded = true;
 	g.frame = 0;
