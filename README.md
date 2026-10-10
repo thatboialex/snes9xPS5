@@ -144,6 +144,8 @@ changed, register it again once:
 
 ## The game shelf and covers
 
+The console downloads **cover artwork only**, not cheat codes. Cheat downloads have been removed; manually copied Libretro or native Snes9x `.cht` files are still recognized by the cheat manager.
+
 The start screen is a 3D shelf of game covers, like PS5SX2's. In the top-left corner, under the wordmark, is the
 author's line with the GitHub mark: **github.com/MisterTemaki** (PS5SX2 shows its author's handles there).
 
@@ -193,7 +195,7 @@ How to use it:
 
 1. Unzip it on the PC.
 2. Copy only the `.png` files inside its **`Named_Boxarts`** folder to the covers folder (over FTP, for example).
-   The zip also has title screens and in-game shots: they are not used. It is large: copying only the covers of
+   The emulator can also use official title screens or in-game screenshots when no box art is available online. It is large: copying only the covers of
    your games saves space.
 3. The names are already right (for example `Super Mario World (USA).png`): don't rename them. Open the app:
    games recognised by name or CRC pick their cover up at once, and nothing is downloaded for them.
@@ -229,7 +231,8 @@ On the test PC a frame takes about 15 ms on 2 cores.
 | L1 / R1 | skip 10 games |
 | Cross | play |
 | Triangle | settings |
-| Square | download this game's cover again (the cover it has stays until the new one has arrived) |
+| Square | retry this game's cover (the existing image remains until a new one arrives) |
+| R3 | retry covers for all games still showing placeholders |
 | OPTIONS | quit Snes9x (asks first) |
 
 **In a game** (buttons by position, as on the SNES pad)
