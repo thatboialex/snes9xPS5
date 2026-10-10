@@ -14,6 +14,7 @@
 #include "fe_emu.h"
 
 #include "fe_games.h"
+#include "fe_cheatdownload.h"
 #include "fe_settings.h"
 #include "fe_shortcuts.h"
 
@@ -506,6 +507,11 @@ bool LoadGame(const std::string& path)
 
 	S9xDeleteCheats();
 	S9xCheatsEnable();
+	const std::string base = S9xBasenameNoExt(path);
+	std::string official = fe::gamedb::ByCrc(Memory.ROMCRC32);
+	if (official.empty()) official = fe::gamedb::Exact(base);
+	if (official.empty()) official = fe::gamedb::Loose(base);
+	fe::InstallCachedCheat({base, official});
 	const std::string cht = S9xGetFilename(".cht", CHEAT_DIR);
 	if (OrbisIsFile(cht))
 	{
@@ -546,6 +552,26 @@ bool GameLoaded()
 int CheatCount()
 {
 	return g.loaded ? int(Cheat.group.size()) : 0;
+}
+
+std::string RomBase()
+{
+	return g.loaded ? S9xBasenameNoExt(g.rom_path) : "";
+}
+std::string RomNoIntro()
+{
+	if (!g.loaded) return "";
+	std::string official = fe::gamedb::ByCrc(Memory.ROMCRC32);
+	if (official.empty()) official = fe::gamedb::Exact(RomBase());
+	if (official.empty()) official = fe::gamedb::Loose(RomBase());
+	return official;
+}
+bool ReloadDownloadedCheats()
+{
+	if (!g.loaded || !Cheat.group.empty()) return false; // never replace user's current cheat selections
+	const std::string filename = S9xGetFilename(".cht", CHEAT_DIR);
+	if (!OrbisIsFile(filename)) return false;
+	return LoadRetroArchCheats(filename) || S9xLoadCheatFile(filename);
 }
 
 std::string CheatName(int index)
