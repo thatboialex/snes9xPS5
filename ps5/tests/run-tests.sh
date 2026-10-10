@@ -643,6 +643,7 @@ expect "[ -f '$D/A.png' ] && [ -f '$D/B.png' ] && [ -f '$D/C.png' ]" "a server t
 
 echo "== 21. manually copied EarthBound (USA).cht loads with EarthBound.zip"
 T=$(newroot t21)
+mkdir -p "$T/root/cheats"
 python3 tests/make_test_rom.py "$T/earthbound.sfc" ntsc >/dev/null
 python3 - "$T/earthbound.sfc" "$T/root/roms/EarthBound.zip" <<'PY'
 import sys,zipfile
