@@ -15,8 +15,8 @@ own icon and background. The PS5 layer follows the layout of PS5SX2 (the PCSX2 p
 Everything outside `ps5/` is the original Snes9x source, unchanged, apart from this README (the original one is
 [README-Snes9x.md](README-Snes9x.md)).
 
-> **Status (2.3):** runs on the console: the app opens from its icon, the shelf, the controller, video and sound
-> work, and games play. It builds with the ps5-payload-dev SDK and passes 173 host tests, which run the same code
+> **Status (2.4):** runs on the console: the app opens from its icon, the shelf, the controller, video and sound
+> work, and games play. It builds with the ps5-payload-dev SDK and runs host regression tests, which exercise the same code
 > on Linux with the PS5 calls simulated. If something fails, the logs in `/data/snes9x/logs/` say where.
 
 ## How it works (the PS5SX2 model)
@@ -46,9 +46,16 @@ written to PS5SX2's folders (`/data/PCSX2`, `/data/homebrew/PPSA99203`).
 
 ## Versions
 
-Every release carries its version in the file name: `Snes9xPS5-v2.3.elf` and `snes9x-ps5-v2.3-src.zip`
+Every release carries its version in the file name: `Snes9xPS5-v2.4.elf` and `snes9x-ps5-v2.4-src.zip`
 (`make dist`). When updating, replace the old ELF with the new one in your autoload or Payload Manager. In this
 README, "`Snes9xPS5.elf`" always means the current release's ELF.
+
+**2.4:** **Manual cheat files only, improved artwork recovery.** Removed the nonworking PS5 cheat
+download menus, automatic cheat queue and network helper thread; manually copied .cht files and in-game
+cheat toggles continue working as before. The cover priority queue now uses the matched title, and missing
+box art can fall back to independently matched official title screens or screenshots. Previously cached
+missing-image responses are retried if the source URLs change. Use Square to retry the selected cover
+or R3 to retry missing artwork for the library. Reinstall the updated ELF after restarting the console.
 
 **2.3:** **The helper downloads the covers with its own HTTPS.** In 2.2 the helper got nothing: the console's own
 HTTPS (libSceSsl) fails outside the app's sandbox, and every cover failed in a few milliseconds while the counter
