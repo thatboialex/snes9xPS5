@@ -735,7 +735,6 @@ void CheatDownloadsMenu(const CheatRequestGame& game)
 {
     NavReader nav;
     int sel = 0;
-    bool confirm_all = false;
     for (;;)
     {
         const bool have_game = !game.basename.empty();
@@ -757,21 +756,14 @@ void CheatDownloadsMenu(const CheatRequestGame& game)
         else snprintf(status, sizeof(status), "%s: %d/%d processed, %d saved, %d failed",
                       p.state.c_str(), p.done, p.total, p.found, p.failed);
         DrawText(125, H - 180, FitText(status, 3, W - 250).c_str(), 3, kText);
-        Footer(confirm_all ? "Download ALL files? Press Cross again to confirm or Circle to cancel"
-                           : "Cross: Download    Circle: Back    Downloads continue in background");
+        Footer("Cross: Start selected download    Circle: Back    Runs in background");
         Present();
         const Nav n = nav.Read();
         if (n.back || n.options) return;
-        if (n.up) { sel = (sel + back_row) % int(rows.size()); confirm_all = false; }
-        if (n.down) { sel = (sel + 1) % int(rows.size()); confirm_all = false; }
+        if (n.up) { sel = (sel + back_row) % int(rows.size()); }
+        if (n.down) { sel = (sel + 1) % int(rows.size()); }
         if (!n.ok) continue;
         if (sel == back_row) return;
-        if (sel == all_row && !confirm_all)
-        {
-            confirm_all = true;
-            continue;
-        }
-        confirm_all = false;
         bool queued = false;
         if (have_game && sel == 0)
             queued = RequestGameCheats(game);
