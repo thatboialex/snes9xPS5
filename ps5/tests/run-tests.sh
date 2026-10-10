@@ -664,6 +664,27 @@ expect "[ $rc = 0 ]" "EarthBound.zip launched and exited"
 expect "grep -q 'Loaded 2 cheats from EarthBound (USA).cht' '$T/root/logs/boot.log'" "manual EarthBound (USA).cht recognized for EarthBound.zip"
 expect "! grep -q 'no supported codes' '$T/root/logs/boot.log'" "EarthBound sample uses supported SNES codes"
 
+
+echo "== 22. previously missing artwork is retried after URL matching improves"
+T=$(newroot t22)
+mkdir -p "$T/root/covers" "$T/srv/Named_Boxarts"
+python3 tests/make_test_rom.py "$T/root/roms/Super Mario World (USA).sfc" ntsc >/dev/null
+python3 - "$T/srv/Named_Boxarts/Super Mario World (USA).png" <<'PY'
+from PIL import Image
+import sys
+Image.new('RGB',(512,357),(255,0,0)).save(sys.argv[1])
+PY
+echo 'https://old.example.invalid/no-such-cover.png' > "$T/root/covers/Super Mario World (USA).missing"
+PORT=18086
+(cd "$T/srv" && exec python3 -m http.server $PORT --bind 127.0.0.1 >/dev/null 2>&1) &
+SRVPID=$!
+sleep 1
+rc=$(OFFLINE= COVER_URL="http://127.0.0.1:$PORT/Named_Boxarts/\${name}.png" SNES9X_HOST_REALTIME=1 run "$T" \
+    "0:0;330:$OPTIONS;332:0;340:$CROSS;342:0" "")
+kill $SRVPID 2>/dev/null
+expect "[ $rc = 0 ]" "game shelf opens even when an old missing-cover marker is present"
+expect "[ -f '$T/root/covers/Super Mario World (USA).png' ]" "improved artwork URL bypasses obsolete 30-day 404 marker"
+
 echo
 echo "passed $PASS, failed $FAIL  (work dir $WORK)"
 [ $FAIL = 0 ]
