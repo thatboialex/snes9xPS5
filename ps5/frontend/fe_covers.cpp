@@ -331,7 +331,11 @@ std::string CoverNameFor(const GameInfo& game)
         const auto it = cache.find(requested);
         if (it!=cache.end()) return it->second;
     }
-    std::string best = titles::Best(BoxArtNames(), requested);
+    // An exact entry may itself be a git symlink pointing at the true box
+    // art. Preserve the name rather than fuzzy-matching to a nearby revision.
+    const auto& names=BoxArtNames();
+    std::string best = std::find(names.begin(),names.end(),requested)!=names.end()
+        ? requested : titles::Best(names, requested);
     if (best.empty() && !game.nointro.empty())
         best = titles::Best(BoxArtNames(), game.file_base);
     if (best.empty()) best = requested; // fallback: title art/screenshot or 404 marker
