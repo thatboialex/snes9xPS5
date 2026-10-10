@@ -90,12 +90,20 @@ const std::vector<std::string>& SnapArtNames()
 }
 std::string MatchArtName(const std::vector<std::string>& names, const GameInfo& game)
 {
+    if (artaliases::DistinctBootleg(game.file_base))
+    {
+        // Bootleg title wins over a misleading underlying-ROM CRC. Use only
+        // true, exact bootleg artwork when present, never another game's.
+        const std::string title=artaliases::TrimFrontendSuffix(game.file_base);
+        return std::find(names.begin(),names.end(),title)!=names.end() ? title : "";
+    }
     // A translated/hacked ROM's filename can be unlike the original Japanese
     // box-art entry. Try only verified aliases for such known games.
     const std::string alias = artaliases::Canonical(game.file_base);
     if (!alias.empty() && std::find(names.begin(), names.end(), alias) != names.end())
         return alias;
-    const std::string requested = game.nointro.empty() ? game.file_base : game.nointro;
+    const std::string requested = artaliases::DistinctBootleg(game.file_base) || game.nointro.empty()
+        ? game.file_base : game.nointro;
     auto exact = std::find(names.begin(), names.end(), requested);
     if (exact != names.end()) return *exact; // preserve revisions and git symlinks
     std::string result = titles::Best(names, requested);
@@ -108,7 +116,8 @@ std::string MatchArtName(const std::vector<std::string>& names, const GameInfo& 
 }
 std::string MatchFallbackArt(const std::vector<std::string>& names, const GameInfo& game)
 {
-    const std::string requested = game.nointro.empty() ? game.file_base : game.nointro;
+    const std::string requested = artaliases::DistinctBootleg(game.file_base) || game.nointro.empty()
+        ? game.file_base : game.nointro;
     static std::mutex match_mutex;
     static std::unordered_map<std::string, std::string> cache;
     // The lookup cache is shared safely by the cover thread and the menu.
@@ -392,7 +401,8 @@ std::shared_ptr<CoverTex> Placeholder(const GameInfo& g)
 
 std::string CoverNameFor(const GameInfo& game)
 {
-    const std::string requested = game.nointro.empty() ? game.file_base : game.nointro;
+    const std::string requested = artaliases::DistinctBootleg(game.file_base) || game.nointro.empty()
+        ? game.file_base : game.nointro;
     const std::string cache_key = requested + "|" + game.file_base;
     static std::mutex mutex;
     static std::unordered_map<std::string,std::string> cache;
