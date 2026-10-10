@@ -89,6 +89,8 @@ int main()
         assert(std::find(titles.begin(),titles.end(),mapped)!=titles.end());
         assert(std::find(snaps.begin(),snaps.end(),mapped)!=snaps.end());
     }
+    assert(fe::artaliases::Canonical("Dragon Ball Z - Super Butouden (France)").empty());
+    assert(fe::artaliases::Canonical("Bahamut Lagoon (USA)").empty());
     assert(fe::artaliases::Canonical("Pokemon Gold & Silver").empty());
     assert(fe::artaliases::Canonical("Aladdin 2000").empty());
     assert(fe::artaliases::Canonical("Final Fantasy 6 (ENG) # SNES")=="Final Fantasy VI (Japan)");
