@@ -185,9 +185,9 @@ struct RetroCheat
 
 std::string TrimField(std::string s)
 {
-	const size_t first = s.find_first_not_of(" \\t\\r\\n");
+	const size_t first = s.find_first_not_of(" \t\r\n");
 	if (first == std::string::npos) return "";
-	const size_t last = s.find_last_not_of(" \\t\\r\\n");
+	const size_t last = s.find_last_not_of(" \t\r\n");
 	s = s.substr(first, last - first + 1);
 	if (s.size() >= 2 && s.front() == '"' && s.back() == '"')
 		s = s.substr(1, s.size() - 2);
@@ -229,7 +229,7 @@ bool LoadRetroArchCheats(const std::string& file)
 		const std::string& code = item.second.code;
 		std::string name = item.second.name.empty() ? ("Cheat " + std::to_string(item.first + 1)) : item.second.name;
 		// Snes9x stores names on a single BML line.
-		for (char& ch : name) if (ch == '\\r' || ch == '\\n') ch = ' ';
+		for (char& ch : name) if (ch == '\r' || ch == '\n') ch = ' ';
 		const int group = S9xAddCheatGroup(name, code);
 		if (group < 0) continue; // unsupported/invalid codes are not selectable
 		if (item.second.enabled) S9xEnableCheatGroup(uint32(group));
