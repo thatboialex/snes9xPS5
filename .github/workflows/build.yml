@@ -18,7 +18,6 @@ jobs:
         run: make -C ps5 -j2 test
 
   ps5-installer:
-    needs: host-tests
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
