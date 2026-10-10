@@ -258,6 +258,7 @@ enum SettingRow
 	S_TRANSPARENCY,
 	S_SUPERFX,
 	S_COVERS,
+	S_CHEATS_AUTO,
 	S_DEBUGLOGS,
 	S_COUNT
 };
@@ -274,6 +275,7 @@ std::string SettingLabel(int s)
 		case S_TRANSPARENCY: return "Transparency";
 		case S_SUPERFX: return "Super FX clock";
 		case S_COVERS: return "Download covers";
+		case S_CHEATS_AUTO: return "Auto-download missing cheats";
 		case S_DEBUGLOGS: return "Debug logs";
 		default: return "";
 	}
@@ -293,6 +295,7 @@ std::string SettingValue(int s)
 		case S_TRANSPARENCY: return YesNo(c.transparency);
 		case S_SUPERFX: snprintf(buf, sizeof(buf), "%d%%", c.superfx_clock); return buf;
 		case S_COVERS: return YesNo(c.covers_download);
+		case S_CHEATS_AUTO: return YesNo(c.cheats_auto_download);
 		case S_DEBUGLOGS: return YesNo(c.debug_logs);
 		default: return "";
 	}
@@ -316,6 +319,7 @@ void ChangeSetting(int s, int dir)
 		case S_AUDIO: c.audio = !c.audio; break;
 		case S_TRANSPARENCY: c.transparency = !c.transparency; break;
 		case S_COVERS: c.covers_download = !c.covers_download; break;
+		case S_CHEATS_AUTO: c.cheats_auto_download = !c.cheats_auto_download; break;
 		case S_DEBUGLOGS:
 			c.debug_logs = !c.debug_logs;
 			OrbisLogSetEnabled(c.debug_logs); // at once: the line saying so is the last (or first) one written
