@@ -20,7 +20,7 @@ The installer must start the **new helper payload**. If an older Snes9x helper i
 | In a game > pause > Cheat manager | **Options** – open cheat downloads |
 | In the cheat manager with no codes | **Cross** – open cheat downloads |
 
-The cheat download screen shows **queued, downloading, completed and offline** states, with a processed/saved/failed counter. A complete SNES download requires two presses of Cross to confirm: the Libretro index currently contains **2,773** .cht files.
+The cheat download screen shows **queued, downloading, completed and offline** states, with a processed/saved/failed counter. Selecting the full SNES collection and pressing Cross now immediately queues the download and displays a confirmation; the Libretro index currently contains **2,773** .cht files.
 
 ## Destination paths
 
@@ -51,6 +51,6 @@ A game without a No-Intro match is attempted by its ROM filename as a best effor
 
 ## Limitations
 
-The **full database** mode makes thousands of separate HTTPS requests and may consume significant time. Downloads continue in the helper while you use the console, and do not run as downloads on the UI thread. There is no cancellation control yet; to avoid launching long jobs accidentally, full downloads require confirmation.
+The **full database** mode makes thousands of separate HTTPS requests and may consume significant time. Downloads continue in the helper while you use the console, and do not run as downloads on the UI thread. There is no cancellation control yet; the full download uses the explicit **Download ALL SNES cheats** menu item and starts with one press of Cross.
 
 This is a source update only until CI validates the new helper and installer. Test cheat importing, repeated code toggles, menu controls, and covers on a PS5 before treating it as production-ready.
