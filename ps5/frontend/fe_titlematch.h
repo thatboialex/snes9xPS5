@@ -15,7 +15,14 @@ inline std::string Key(const std::string& name)
 {
     std::string out;
     int depth = 0;
-    for (unsigned char c : name)
+    std::string stem = name;
+    for (const char* ext : {".cht", ".png", ".sfc", ".smc", ".zip"})
+    {
+        const size_t n = std::char_traits<char>::length(ext);
+        if (stem.size()>n && stem.compare(stem.size()-n,n,ext)==0)
+        { stem.resize(stem.size()-n); break; }
+    }
+    for (unsigned char c : stem)
     {
         if (c == '(' || c == '[') { ++depth; continue; }
         if (c == ')' || c == ']') { if (depth) --depth; continue; }
